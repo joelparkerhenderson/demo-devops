@@ -1,0 +1,160 @@
+@startuml
+skinparam monochrome true
+skinparam defaultTextAlignment center
+
+
+' icons
+
+!include <font-awesome/balance_scale>
+!include <font-awesome/check_circle>
+!include <font-awesome/cloud>
+!include <font-awesome/cloud_upload>
+!include <font-awesome/cube>
+!include <font-awesome/cubes>
+!include <font-awesome/database>
+!include <font-awesome/exchange>
+!include <font-awesome/file_code_o>
+!include <font-awesome/file_image_o>
+!include <font-awesome/firefox>
+!include <font-awesome/folder_open>
+!include <font-awesome/gavel>
+!include <font-awesome/gear>
+!include <font-awesome/globe>
+!include <font-awesome/heartbeat>
+!include <font-awesome/magic>
+!include <font-awesome/refresh>
+!include <font-awesome/share_alt_square>
+!include <font-awesome/ship>
+!include <font-awesome/thumbs_up>
+!include <font-awesome/trophy>
+!include <font-awesome/truck>
+!include <font-awesome/user>
+!include <font-awesome/users>
+
+usecase "\n<$magic>\n<size:20><U+00A0><U+00A0>  Define  <U+00A0><U+00A0></size>\n" as Define
+usecase "\n<$refresh>\n<size:20><U+00A0><U+00A0>  Deploy  <U+00A0><U+00A0></size>\n" as Deploy
+usecase "\n<$trophy>\n<size:20><U+00A0><U+00A0>  Deliver  <U+00A0><U+00A0></size>\n" as Deliver
+
+Define -r-> Deploy
+Deploy -r-> Deliver
+
+queue "\n<$file_image_o>\n<size:20><U+00A0><U+00A0>  Design  <U+00A0><U+00A0></size>\n" as Design
+queue "\n<$file_code_o>\n<size:20><U+00A0><U+00A0>  Develop  <U+00A0><U+00A0></size>\n" as Develop
+queue "\n<$folder_open>\n<size:20><U+00A0><U+00A0>   Commit   <U+00A0><U+00A0></size>\n" as Commit
+queue "\n<$cube>\n<size:20><U+00A0><U+00A0>  Package  <U+00A0><U+00A0></size>\n" as Package
+queue "\n<$balance_scale>\n<size:20><U+00A0><U+00A0>        Test        <U+00A0><U+00A0></size>\n" as Test
+queue "\n<$cloud_upload>\n<size:20><U+00A0><U+00A0>  Release  <U+00A0><U+00A0></size>\n" as Release
+queue "\n<$gavel>\n<size:20><U+00A0><U+00A0>  Review  <U+00A0><U+00A0></size>\n" as Review
+queue "\n<$thumbs_up>\n<size:20><U+00A0><U+00A0>  Promote  <U+00A0><U+00A0></size>\n" as Promote
+queue "\n<$globe>\n<size:20><U+00A0><U+00A0>  Success  <U+00A0><U+00A0></size>\n" as Success
+
+Define -d- Design
+Define -d- Develop
+Define -d- Commit
+
+Deploy -d- Package
+Deploy -d- Test
+Deploy -d- Release
+
+Deliver -d- Review
+Deliver -d- Promote
+Deliver -d- Success
+
+Design -r-> Develop
+Develop -r-> Commit
+Commit -r-> Package
+Package -r-> Test
+Test -r-> Release
+Release -r-> Review
+Review -r-> Promote
+Promote -r-> Success
+
+
+' Design
+
+entity "Wirefames\nMockups\nPrototypes" as DesignEntities
+control "<size:20>Specs</size>\nUse cases\nFlowcharts\nChecklists" as DesignControls
+
+Design -d-> DesignEntities
+DesignEntities -d-> DesignControls
+
+
+' Develop
+
+entity "Source code\nAsset files\nBuild artifacts" as DevelopEntities
+control "<size:20>Smoke Tests</size>\nUnit Tests\nFunctional Tests\nIntegration Tests" as DevelopControls
+boundary "Committable\nSmoke tests good\nIaC changes good" as DevelopOutput
+
+Develop -d-> DevelopEntities
+DevelopEntities -d-> DevelopControls
+DevelopControls -d-> DevelopOutput
+
+
+' Commit
+
+control "<size:20>Hooks</size>\nPre-Commit Hooks\nPost-Commit Hooks\nUpdate Hooks" as CommitControls
+boundary "Topic branch\nTeam notification" as CommitOutput
+
+Commit -d-> CommitControls
+CommitControls -d-> CommitOutput
+
+
+' Package
+
+control "<size:20>Process</size>\nUpdate dependencies\nCombine artifacts\nCreate containers" as PackageControls
+boundary "Dependency graph\nArtifact archive\nDocker containers" as PackageOutput
+
+Package -d-> PackageControls
+PackageControls -d-> PackageOutput
+
+
+' Test
+
+control "<size:20>Core Tests</size>\nUnit Tests\nFunctional Tests\nIntegration Tests" as CoreTestControls
+control "<size:20>Quality Tests</size>\nSystem Tests\nSecurity Tests\nPerformance Tests" as QualityTestControls
+boundary "Signoff by CI/CD" as TestOutput
+
+Test -d-> CoreTestControls
+CoreTestControls -d-> QualityTestControls
+QualityTestControls -d-> TestOutput
+
+
+' Release
+
+entity "<size:20>Inputs</size>\nContainer packages\nTest approvals\nCredentials access" as ReleaseInputs
+control "<size:20>Process</size>\nProvision: Terraform\nConfiguration: Ansible\nMigration: Liquibase" as ReleaseControls
+entity "Rainbow release\nNew environment\nTeam notification\nReady for review" as ReleaseOutput
+
+Release -d-> ReleaseInputs
+ReleaseInputs -d-> ReleaseControls
+ReleaseControls -d-> ReleaseOutput
+
+
+' Review
+
+control "<size:20>Process</size>\nTechnical reviews\nProduct reviews\nQuality reviews" as ReviewControls
+boundary "Signoff by reviewers" as ReviewOutput
+
+Review -d-> ReviewControls
+ReviewControls -d-> ReviewOutput
+
+
+' Promote
+
+control "<size:20>Process</size>\nThrottle rollouts\nFeature toggles\nSplit tests" as PromoteControls
+boundary "Rollout" as PromoteOutput
+
+Promote -d-> PromoteControls
+PromoteControls -d-> PromoteOutput
+
+
+' Success
+
+control "<size:20>Process</size>\nUser feedback\nTelemetry feedback\nMonitoring & alerting" as SuccessControls
+boundary "Ongoing operation" as SuccessOutput
+
+Success -d-> SuccessControls
+SuccessControls -d-> SuccessOutput
+
+@enduml
+
