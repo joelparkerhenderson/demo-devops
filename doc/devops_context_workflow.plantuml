@@ -1,0 +1,161 @@
+@startuml
+skinparam monochrome true
+skinparam defaultTextAlignment center
+
+
+' icons
+
+!include <font-awesome/check_circle>
+!include <font-awesome/cloud>
+!include <font-awesome/cubes>
+!include <font-awesome/database>
+!include <font-awesome/exchange>
+!include <font-awesome/file_code_o>
+!include <font-awesome/file_image_o>
+!include <font-awesome/firefox>
+!include <font-awesome/folder_open>
+!include <font-awesome/gavel>
+!include <font-awesome/gear>
+!include <font-awesome/globe>
+!include <font-awesome/heartbeat>
+!include <font-awesome/share_alt_square>
+
+
+' Pipeline objects
+
+card "<$folder_open>\n<size:22><U+00A0><U+00A0>Source repository<U+00A0><U+00A0></size>\n\n<U+00A0><U+00A0>e.g. Git, TFVC, Perforce<U+00A0><U+00A0>\n\n" as Code
+cloud "<$cubes>\n<size:22><U+00A0><U+00A0>Source hosting<U+00A0><U+00A0></size>\n\n<U+00A0><U+00A0>e.g. GitHub, BitBucket, Launchpad <U+00A0><U+00A0>\n\n" as SourceHost
+queue " <$check_circle>\n<size:22><U+00A0><U+00A0>Continuous delivery<U+00A0><U+00A0></size>\n\n<U+00A0><U+00A0> e.g. Jenkins, Travis, Circle<U+00A0><U+00A0>\n\n" as CI
+cloud "<$cloud>\n<size:22><U+00A0><U+00A0>Platform hosting<U+00A0><U+00A0></size>\n\n<U+00A0><U+00A0>e.g. Azure, AWS, GCP <U+00A0><U+00A0>\n\n" as PlatformHost
+card "<$globe>\n<size:22><U+00A0><U+00A0>Platform edges<U+00A0><U+00A0></size>\n\n<U+00A0><U+00A0>e.g. CDNs, APIs, RPCs<U+00A0><U+00A0>\n\n" as PlatformEdges
+
+
+
+' Pipeline flow
+
+Code -r-> SourceHost : "         Push         "
+SourceHost -> CI : "    Merge    "
+CI -r-> PlatformHost : "     Deploy    "
+PlatformHost -> PlatformEdges : "    Distribute    "
+
+
+' Designer
+
+actor "Designers" as Designer
+usecase "\n<$file_image_o>\n<size:20><U+00A0><U+00A0>Product design<U+00A0><U+00A0></size>\n\nWirefames\nMockups\nPrototypes\n\n" as DesignUseCase
+Designer -d-> DesignUseCase
+DesignUseCase -d-> Code
+
+
+' Developer
+
+actor "Developers" as Developer
+usecase "\n<$file_code_o>\n<size:20><U+00A0><U+00A0>Product development<U+00A0><U+00A0></size>\n\nCode\nAssets\nArtifacts\n\n" as DevelopUseCase
+Developer -d-> DevelopUseCase
+DevelopUseCase -d-> Code
+
+
+' Reviewer
+
+actor "Reviewers" as Reviewer
+usecase "\n<$gavel>\n<size:20><U+00A0><U+00A0>Code review<U+00A0><U+00A0></size>\n\nBranches\nComments\nResolutions\n\n" as ReviewUseCase
+Reviewer -d-> ReviewUseCase
+ReviewUseCase -d-> SourceHost
+
+
+' Tester
+
+actor "Testers" as Tester
+usecase "\n<$heartbeat>\n<size:20>Quality goals</size>\n\nAvailability\nScalability\nSecurity\n\n" as QualityUseCase
+Tester -d-> QualityUseCase
+QualityUseCase -d-> SourceHost
+QualityUseCase -d-> CI
+QualityUseCase -d-> PlatformHost
+
+
+' Sysop
+
+usecase "\n<$gear>\n<size:20>Operations</size>\n\n  Infrastructure capabilities  \n  Site reliability engineering  \n  Systems administration  \n\n" as OperationsUseCase
+OperationsUseCase -u-> SourceHost
+OperationsUseCase -u-> CI
+OperationsUseCase -u-> PlatformHost
+
+
+' Collaborator
+
+actor "Collaborators" as Collaborator
+usecase "\n<$exchange>\n<size:20>Integration</size>\n\nPartners\nProviders\nDistributors\n\n" as CollaborateUseCase
+Collaborator -d-> CollaborateUseCase
+CollaborateUseCase -d-> PlatformHost
+
+
+' Command customer
+
+actor "API End Users" as APIEndUser
+usecase "\n<$share_alt_square>\n<size:20>API</size>\n\nRESTful\nGraphQL\nFIX\n\n" as APIUseCase
+APIEndUser -d-> APIUseCase
+APIUseCase -d-> PlatformEdges
+
+
+' Browser customer
+
+actor "Browser End Users" as BrowserEndUser
+usecase "\n<$firefox>\n<size:20>Browser</size>\n\nFirefox\nChrome\nSafari\n\n" as BrowserUseCase
+BrowserEndUser -d-> BrowserUseCase
+BrowserUseCase -d-> PlatformEdges
+
+
+' Hinting
+
+DesignUseCase -[hidden]r- DevelopUseCase
+DevelopUseCase -[hidden]r- ReviewUseCase
+ReviewUseCase -[hidden]r- QualityUseCase
+QualityUseCase -[hidden]r- CollaborateUseCase
+CollaborateUseCase -[hidden]r- APIUseCase
+APIUseCase -[hidden]r- BrowserUseCase
+
+
+' controls for code
+
+control "<size:20>Specs</size>\n\nUse cases\nFlowcharts\nChecklists" as CodeSpecs 
+control "<size:20>Tests</size>\n\nUnit\nFunctional\nIntegration" as CodeTests
+control "<size:20>Hooks</size>\n\nPre-Commit\nPost-Merge\nUpdate" as CodeHooks
+
+CodeSpecs -u-> Code
+CodeTests -u-> Code
+CodeHooks -u-> Code
+
+
+' controls for git host
+
+control "<size:20>Reviews</size>\n\nComments\nApprovals\nVotes" as SourceReviews
+control "<size:20>Tests</size>\n\nSystem\nBenchmark\nSecurity" as SourceTests
+control "<size:20>Checks</size>\n\nCoverages\nConflicts\nAudits" as SourceChecks
+
+SourceReviews -u-> SourceHost
+SourceTests -u-> SourceHost
+SourceChecks -u-> SourceHost
+
+
+' controls for app host
+
+control "<size:20>Protocols</size>\n\nDNS\nHTTP\nSSH" as Protocols
+control "<size:20>Platforms</size>\n\nManagers\nContainers\nOrchestrators" as Platforms
+control "<size:20>Servers</size>\n\nWebservers\nDatabases\nCredentialers" as Servers
+
+Protocols -u-> PlatformHost
+Platforms -u-> PlatformHost
+Servers -u-> PlatformHost
+
+
+' controls for app interfaces
+
+control "<size:20>Sentries</size>\n\nFirewalls\nInspectors\nShapers" as Sentries
+control "<size:20>Proxies</size>\n\nAuthenticators\nAccelerators\nBalancers" as Proxies
+control "<size:20>Caches</size>\n\nObjects\nFunctions\nFragments" as Caches
+
+Sentries -u-> PlatformEdges
+Proxies -u-> PlatformEdges
+Caches -u-> PlatformEdges
+
+@enduml
