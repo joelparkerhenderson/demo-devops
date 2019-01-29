@@ -12,6 +12,7 @@
 
 ### For technical people
 
+* [VirtualBox 6](https://www.virtualbox.org/)
 * https://github.com/SixArm/sixarm_brew_brewfile/blob/master/Brewfile
 
 
